@@ -1,1 +1,0 @@
-/usr/bin/aarch64-linux-gnu-g++-12 --sysroot=/home/user/rpi-sysroot CMakeFiles/barcode.dir/main.cpp.o -o barcode  /home/user/rpi-sysroot/usr/lib/aarch64-linux-gnu/libcurl.so 
