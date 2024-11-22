@@ -1,0 +1,3 @@
+/home/user/projects/barcode_scanner/build/CMakeFiles/barcode.dir
+/home/user/projects/barcode_scanner/build/CMakeFiles/edit_cache.dir
+/home/user/projects/barcode_scanner/build/CMakeFiles/rebuild_cache.dir
