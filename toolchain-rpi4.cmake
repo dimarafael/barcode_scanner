@@ -3,6 +3,7 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # Set the compiler paths
+# sudo apt install gcc-12-aarch64-linux-gnu g++-12-aarch64-linux-gnu
 set(CMAKE_C_COMPILER /usr/bin/aarch64-linux-gnu-gcc-12)
 set(CMAKE_CXX_COMPILER /usr/bin/aarch64-linux-gnu-g++-12)
 
