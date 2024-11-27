@@ -7,6 +7,6 @@ if [ ! -d $DIR/build ]; then
 fi
 cd $DIR/build
 
-cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-rpi4.cmake ..
-
+# cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain-rpi4.cmake ..
+cmake ..
 make VERBOSE=1

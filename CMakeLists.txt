@@ -5,6 +5,8 @@ project(barcode VERSION 0.1.0 LANGUAGES CXX)
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+
 # Cross-compilation settings
 if(CMAKE_SYSTEM_NAME STREQUAL "")
     message(FATAL_ERROR "Please invoke CMake with a toolchain file for cross-compilation.")
