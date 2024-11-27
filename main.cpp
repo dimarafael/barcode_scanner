@@ -1,10 +1,3 @@
-// #include <iostream>
-// #include <fstream>
-// #include <fcntl.h>
-// #include <unistd.h>
-// #include <string>
-// #include <curl/curl.h>
-
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -55,6 +48,15 @@ std::string findDevice() {
     return smallestDevice;
 }
 
+bool deviceExists(const char* device) {
+    struct stat buffer;
+    return (stat(device, &buffer) == 0);
+}
+
+int openDevice(const char* device) {
+    return open(device, O_RDONLY | O_NOCTTY | O_NONBLOCK);
+}
+
 void sendHttpPost(const std::string& barcode) {
     CURL* curl;
     CURLcode res;
@@ -100,7 +102,7 @@ int main() {
     cout << "Scanner port : " << scannerPort << endl;
 
     // Open the serial port
-    int serialPort = open(scannerPort.c_str(), O_RDONLY | O_NOCTTY | O_NONBLOCK);
+    int serialPort = openDevice(scannerPort.c_str()); //open(scannerPort.c_str(), O_RDONLY | O_NOCTTY | O_NONBLOCK);
 
     if (serialPort < 0) {
         perror("Error opening serial port");
