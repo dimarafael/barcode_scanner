@@ -1,17 +1,12 @@
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
-
 #include <regex>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <limits>
-
-#include <cerrno>
 #include <cstring>
 
 #include <curl/curl.h>
@@ -172,7 +167,7 @@ int main() {
         if(!deviceOk){
             serialPort = openDevice(scannerDev.c_str());
             if(serialPort >= 0){
-                cout << "Port " << scannerDev << "opened : " << serialPort << endl;
+                cout << "Port " << scannerDev << " opened : " << serialPort << endl;
                 if( configureScannerPort(serialPort) ){
                     cout << "Port configured" << endl;
                     deviceOk = true;

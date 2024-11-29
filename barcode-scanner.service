@@ -1,0 +1,16 @@
+[Unit]
+Description=Barcode Scanner Program
+After=network.target
+
+[Service]
+ExecStart=/home/admin/barcode
+Restart=always
+User=admin
+WorkingDirectory=/home/admin
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=barcode-scanner
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
