@@ -21,30 +21,38 @@ using namespace std;
 std::string findDevice() {
     const std::string devPath = "/dev/";
     const std::string prefix = "ttyACM";
-    DIR* dir = opendir(devPath.c_str());
-    if (!dir) {
-        std::cerr << "Failed to open /dev directory: " << strerror(errno) << std::endl;
-        return "";
-    }
-
+    // const std::string prefix = "ttyUSB";
     std::string smallestDevice = "";
-    int smallestNumber = std::numeric_limits<int>::max();
+    int smallestNumber = 0;
 
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != nullptr) {
-        std::string fileName(entry->d_name);
-        if (fileName.rfind(prefix, 0) == 0) { // Check if it starts with "ttyACM"
-            std::string numberStr = fileName.substr(prefix.length());
-            if (!numberStr.empty() && std::all_of(numberStr.begin(), numberStr.end(), ::isdigit)) {
-                int number = std::stoi(numberStr);
-                if (number < smallestNumber) {
-                    smallestNumber = number;
-                    smallestDevice = devPath + fileName;
+    cout << "Serching device " << devPath + prefix << " ... " << endl;
+
+    while (smallestDevice.length() <= 0){
+        DIR* dir = opendir(devPath.c_str());
+        if (!dir) {
+            std::cerr << "Failed to open /dev directory: " << strerror(errno) << std::endl;
+            return "";
+        }
+
+        smallestNumber = std::numeric_limits<int>::max();
+
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            std::string fileName(entry->d_name);
+            if (fileName.rfind(prefix, 0) == 0) { // Check if it starts with "ttyACM"
+                std::string numberStr = fileName.substr(prefix.length());
+                if (!numberStr.empty() && std::all_of(numberStr.begin(), numberStr.end(), ::isdigit)) {
+                    int number = std::stoi(numberStr);
+                    if (number < smallestNumber) {
+                        smallestNumber = number;
+                        smallestDevice = devPath + fileName;
+                    }
                 }
             }
         }
+        closedir(dir);
     }
-    closedir(dir);
+    cout << "Scanner found on port : " << smallestDevice << endl;
     return smallestDevice;
 }
 
@@ -96,25 +104,12 @@ void sendHttpPost(const std::string& barcode) {
     }
 }
 
-int main() {
-
-    string scannerPort = findDevice();
-    cout << "Scanner port : " << scannerPort << endl;
-
-    // Open the serial port
-    int serialPort = openDevice(scannerPort.c_str()); //open(scannerPort.c_str(), O_RDONLY | O_NOCTTY | O_NONBLOCK);
-
-    if (serialPort < 0) {
-        perror("Error opening serial port");
-        return EXIT_FAILURE;
-    }
-
-        // Configure the serial port
+bool configureScannerPort(int serialPort){
     struct termios tty;
     if (tcgetattr(serialPort, &tty) != 0) {
         perror("Error getting terminal attributes");
         close(serialPort);
-        return 1;
+        return false;
     }
 
     // Set baud rate
@@ -147,22 +142,49 @@ int main() {
     if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
         perror("Error setting terminal attributes");
         close(serialPort);
-        return 1;
+        return false;
     }
+    return true;
+}
 
-    std::cout << "Serial port configured successfully!\n";
+int main() {
+    bool deviceOk = false;
+    string scannerDev = "";
+    int serialPort = 0;
+    char buffer[256];
 
     // Read and print data
-    char buffer[256];
     while (true) {
-        ssize_t bytesRead = read(serialPort, buffer, sizeof(buffer) - 1);
-        if (bytesRead > 0) {
-            buffer[bytesRead] = '\0';  // Null-terminate the string
-            std::cout << buffer << endl;
+        
+        if(scannerDev.length() <= 0 || !deviceExists(scannerDev.c_str())){
+            scannerDev = findDevice();
+            deviceOk = false;
+        }
 
-            std::string barcode(buffer);
-            // Send HTTP POST with the barcode
-            sendHttpPost(barcode);
+        if(!deviceOk){
+            serialPort = openDevice(scannerDev.c_str());
+            if(serialPort >= 0){
+                cout << "Port " << scannerDev << "opened : " << serialPort << endl;
+                if( configureScannerPort(serialPort) ){
+                    cout << "Port configured" << endl;
+                    deviceOk = true;
+                }
+            }
+        }
+
+        if(deviceOk){
+            ssize_t bytesRead = read(serialPort, buffer, sizeof(buffer) - 1);
+            if (bytesRead > 0) {
+                buffer[bytesRead] = '\0';  // Null-terminate the string
+
+                std::string barcode(buffer);
+                
+                // Send HTTP POST with the barcode
+                sendHttpPost(barcode);
+                cout << "Barcode : " << barcode << endl;
+            }
+        } else {
+            close(serialPort);
         }
     }
 
