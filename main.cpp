@@ -27,7 +27,7 @@ std::string findDevice() {
 
     cout << "Serching device " << devPath + prefix << " ... " << endl;
 
-    while (smallestDevice.length() <= 0){
+    while (true){
         DIR* dir = opendir(devPath.c_str());
         if (!dir) {
             std::cerr << "Failed to open /dev directory: " << strerror(errno) << std::endl;
@@ -51,6 +51,8 @@ std::string findDevice() {
             }
         }
         closedir(dir);
+        if (smallestDevice.length() > 0 ) break;
+        sleep(1);
     }
     cout << "Scanner found on port : " << smallestDevice << endl;
     return smallestDevice;
@@ -156,7 +158,13 @@ int main() {
     // Read and print data
     while (true) {
         
-        if(scannerDev.length() <= 0 || !deviceExists(scannerDev.c_str())){
+        if(scannerDev.length() <= 0){
+            scannerDev = findDevice();
+            deviceOk = false;
+        }
+
+        if(!deviceExists(scannerDev.c_str())){
+            close(serialPort);
             scannerDev = findDevice();
             deviceOk = false;
         }
@@ -183,8 +191,6 @@ int main() {
                 sendHttpPost(barcode);
                 cout << "Barcode : " << barcode << endl;
             }
-        } else {
-            close(serialPort);
         }
     }
 
