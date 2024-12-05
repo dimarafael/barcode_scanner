@@ -8,6 +8,8 @@
 #include <dirent.h>
 #include <limits>
 #include <cstring>
+#include <thread>
+#include <chrono>
 
 #include <curl/curl.h>
 
@@ -187,6 +189,7 @@ int main() {
                 cout << "Barcode : " << barcode << endl;
             }
         }
+        this_thread::sleep_for(chrono::milliseconds(100));
     }
 
     // Close the serial port (unreachable in this example)
